@@ -1,34 +1,14 @@
-const { Kafka, Partitioners, logLevel } = require('kafkajs')
+const kafka = require('kafka-node')
 
-// This is a broker - a single Kafka instance
-const kafka = new Kafka({
-  clientId: 'my-app',
-  brokers: ['localhost:9092'],
-  logLevel: logLevel.ERROR
+const client = new kafka.KafkaClient({
+  kafkaHost: process.env.KAFKA_HOST,
+  clientId: process.env.KAFKA_CLIENT_ID,
 })
 
-// Producer is an api-gateway that writes data to one or more Kafka topics
-const producer = kafka.producer({
-  createPartitioner: Partitioners.LegacyPartitioner
-})
+const Producer = kafka.Producer;
 
-const consumer = kafka.consumer({
-  groupId: 'test-group',
-})
-
-
-async function run() {
-  try {
-    await producer.connect()
-    await consumer.connect()
-  } catch (e) {
-    kafka.logger().error(e.message)
-  }
-}
-
-run()
+const producer = new Producer(client);
 
 module.exports = {
   producer,
-  consumer
 };
